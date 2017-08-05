@@ -28,7 +28,7 @@ struct SimpleValue {
 	char getChar() const {
 		return (value ? 'o' : ' ');
 	}
-	void print(std::ostream &os) const {
+	void print(std::ostream &os, int x, int y) const {
 		os << (value ? ifSet : ifUnset);
 	}
 

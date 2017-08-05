@@ -1,4 +1,5 @@
 #include <iostream>
+#include <algorithm>
 #include <vector>
 #include <sstream>
 #include "clife.hpp"
@@ -17,14 +18,13 @@
  *  Feel free to use this for anything you like
  */
 
-constexpr bool to_ledscreen = false;
+constexpr bool to_ledscreen = true;
 constexpr bool concise = true;
-std::function<int()> get_width;
 
 // Uncomment to get terminal-based size
-#define FIXED_SIZE
+#define FIXED_SIZE 1
 #define FIXED_WIDTH 80
-#define FIXED_HEIGHT 8
+#define FIXED_HEIGHT 80
 
 struct MulticolorValue {
 	bool value;
@@ -145,7 +145,7 @@ struct MulticolorValue {
 	void begin_screen(std::ostream &os) const {
 		if(!to_ledscreen && !concise) {
 			std::cout << "+";
-			for(size_t i = 0; i < get_width(); ++i) {
+			for(size_t i = 0; i < FIXED_WIDTH; ++i) {
 				std::cout << "-";
 			}
 			std::cout << "+\n";
@@ -166,8 +166,12 @@ struct MulticolorValue {
 		}
 	}
 
-	void print(std::ostream &os) const {
-		if(value && to_ledscreen) {
+	void print(std::ostream &os, int x, int y) const {
+		if (true) {
+			os << std::dec << "PX " << x + 400 << " " << y << " " << \
+				std::hex << (red >> 4) << (red & 15) << (green >> 4) << \
+				(green & 15) << (blue >> 4) << (blue & 15) << std::endl;
+		} else if(value && to_ledscreen) {
 			os << red << green << blue;
 		} else if(value) {
 			double brightness = std::max(0.3, 1 - age / 20.);
@@ -188,7 +192,7 @@ struct MulticolorValue {
 template <typename FieldType>
 void check_stop_condition(FieldType field, std::vector<std::string> &earlier_hashes, bool &done, int &repeats_to_do) {
 	std::string hash = field.field_hash();
-	for(int i = 0; i < earlier_hashes.size(); ++i) {
+	for(unsigned int i = 0; i < earlier_hashes.size(); ++i) {
 		if(earlier_hashes[i] == hash) {
 			done = true;
 			repeats_to_do = 50;
@@ -222,9 +226,6 @@ int main(int argc, char *argv[]) {
 #endif
 	std::vector<std::string> earlier_hashes;
 	GameOfLifeField<MulticolorValue> field(current_winsize.ws_col, current_winsize.ws_row);
-	get_width = [&field]() {
-		return field.get_width();
-	};
 
 	field.generateRandom(35);
 
